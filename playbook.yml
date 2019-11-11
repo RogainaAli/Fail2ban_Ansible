@@ -1,0 +1,18 @@
+---
+- hosts: f2b_clients
+  remote_user: rogaina
+  become: true
+
+  vars_files:
+    - Authentication
+
+  vars:
+    - db_name: fail2ban
+    - db_user: f2b_user
+    - db_password: 123
+
+  roles:
+    - mysql
+    - php
+    - f2b
+

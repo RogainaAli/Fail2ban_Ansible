@@ -1,0 +1,11 @@
+---
+- hosts: nagios_clients
+  remote_user: rogaina
+  become: true
+
+  vars_files:
+    - Authentication
+
+  roles:
+    - f2b
+

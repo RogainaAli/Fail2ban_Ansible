@@ -1,0 +1,46 @@
+---
+- name: apt-get update the server
+  apt: update_cache=yes
+
+- name: Install fail2ban package
+  apt:
+    name: fail2ban
+
+- name: Copy jails'files 
+  copy:
+    src: "{{ item }}"
+    dest: /etc/fail2ban/jail.d 
+    mode: '0664'
+  with_items:
+    - "/home/rogaina/fail2ban/roles/f2b/jails/defaults-debian.conf"
+    - "/home/rogaina/fail2ban/roles/f2b/jails/http-get-dos.conf"
+
+- name: Copy filter file
+  copy:
+    src: /home/rogaina/fail2ban/roles/f2b/filters/http-get-dos.conf
+    dest: /etc/fail2ban/filter.d
+    mode: '0664'
+
+- name: modify actionban to make fail2ban to revoke php script to save banned ips in database 
+  lineinfile:
+    path: /etc/fail2ban/action.d/iptables.conf
+    regexp: '^actionban*'
+    line: "actionban = <iptables> -I f2b-<name> 1 -s <ip> -j REJECT"
+                      
+
+- name: modify actionban to make fail2ban to revoke php script to save banned ips in database
+  lineinfile:
+    path: /etc/fail2ban/action.d/iptables.conf
+    insertafter: "actionban = <iptables> -I f2b-<name> 1 -s <ip> -j REJECT"
+    line: "            /home/rogaina/fail2ban.php <name> <protocol> <port> <ip>"
+
+- name: we disable banaction in main configuration file
+  replace:
+    path: /etc/fail2ban/jail.conf
+    regexp: 'banaction = iptables-multiport'
+    replace: "#banaction = iptables-multiport"
+
+- name: Restart service fail2ban, in all cases
+  service:
+    name: fail2ban
+    state: restarted

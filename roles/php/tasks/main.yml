@@ -1,0 +1,34 @@
+---
+- name: Install software-properties-common package
+  apt: name=software-properties-common state=latest
+
+- name: "Add repository for PHP 7.0."
+  apt_repository: 
+    repo="ppa:ondrej/php" 
+    update_cache=yes
+
+- name: Install a list of php packages
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - php7.0
+    - php7.0-fpm 
+    - php7.0-mysql 
+    - php-common 
+    - php7.0-cli 
+    - php7.0-common 
+    - php7.0-json 
+    - php7.0-opcache 
+    - php7.0-readline 
+    - php7.0-mbstring 
+    - php7.0-xml 
+    - php7.0-gd 
+    - php7.0-curl
+
+- name: Copy fail2ban php script
+  copy:
+    src: /home/rogaina/fail2ban/roles/php/fail2ban.php
+    dest: /home/rogaina/fail2ban.php
+    mode: '0775'
+

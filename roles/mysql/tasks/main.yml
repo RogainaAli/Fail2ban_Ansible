@@ -1,0 +1,40 @@
+---
+- name: apt-get update the server
+  apt: update_cache=yes
+
+- name: Install MySQL server
+  apt: name=mysql-server state=latest
+
+- name: Install MySQL client
+  apt: name=mysql-client state=latest
+
+- name: Install libmysqlclient-dev
+  apt: name=libmysqlclient-dev state=latest
+
+- name: Install Python MySQLdb
+  apt: name=python-mysqldb state=latest
+
+- name: Create the redmine database
+  mysql_db: db={{ db_name }} state=present
+
+- name: Create the fail2ban user
+  mysql_user: >
+    name={{ db_user }}
+    password={{ db_password }}
+    priv={{ db_name }}.*:ALL
+    host=localhost
+
+- name: Copy mysql dump file 
+  copy:
+    src: /home/rogaina/fail2ban/roles/mysql/tasks/dump.sql
+    dest: /tmp/dump.sql
+    mode: '0664'
+
+- name: import fail2ban table to fail2ban database
+  mysql_db:
+    name: "{{ db_name }}"
+    login_user: "{{ db_user }}"
+    login_host: localhost
+    login_password: "{{ db_password }}"
+    state: import
+    target: /tmp/dump.sql
